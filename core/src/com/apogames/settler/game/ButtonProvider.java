@@ -63,7 +63,7 @@ public class ButtonProvider {
 			button.setFont(AssetLoader.font40);
 			this.game.getButtons().add(button);
 
-			text = "X";
+			text = "";
 			function = Tiwanaku.FUNCTION_TIWANAKU_BACK;
 			width = 64;
 			height = 64;
@@ -72,7 +72,8 @@ public class ButtonProvider {
 			button = new ApoButtonImageWithThree(x, y, width, height, function, text, AssetLoader.buttonXTextureRegion);
 			//ApoButtonColor(x, y, width, height, function, text, Constants.COLOR_BACKGROUND, Constants.COLOR_WHITE);
 			button.setStroke(1);
-			button.setFont(AssetLoader.font40);
+			button.setFont(AssetLoader.font15);
+			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Menu");
 			this.game.getButtons().add(button);
 
 			text = "Play";
@@ -111,7 +112,7 @@ public class ButtonProvider {
 
 			int addValue = 100;
 
-			text = "<";
+			text = "";
 			function = Menu.FUNCTION_LEVEL_LEFT;
 			width = 64;
 			height = 64;
@@ -121,7 +122,7 @@ public class ButtonProvider {
 			button.setFont(AssetLoader.font30);
 			this.game.getButtons().add(button);
 
-			text = ">";
+			text = "";
 			function = Menu.FUNCTION_LEVEL_RIGHT;
 			width = 64;
 			height = 64;
@@ -132,7 +133,7 @@ public class ButtonProvider {
 			this.game.getButtons().add(button);
 
 
-			text = "<";
+			text = "";
 			function = Menu.FUNCTION_DIFFICULTY_LEFT;
 			width = 64;
 			height = 64;
@@ -142,7 +143,7 @@ public class ButtonProvider {
 			button.setFont(AssetLoader.font30);
 			this.game.getButtons().add(button);
 
-			text = ">";
+			text = "";
 			function = Menu.FUNCTION_DIFFICULTY_RIGHT;
 			width = 64;
 			height = 64;
@@ -163,14 +164,15 @@ public class ButtonProvider {
 			button.setFont(AssetLoader.font30);
 			this.game.getButtons().add(button);
 
-			text = "restart";
+			text = "";
 			function = Tiwanaku.FUNCTION_RESTART;
 			width = 64;
 			height = 64;
 			x = Constants.GAME_WIDTH - AssetLoader.hudRightTextureRegion.getRegionWidth() + 5;
 			y = Constants.GAME_HEIGHT - (height + 5);
 			button = new ApoButtonImageWithThree(x, y, width, height, function, text, AssetLoader.buttonRestartTextureRegion);
-			button.setFont(AssetLoader.font30);
+			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Restart");
+			button.setFont(AssetLoader.font15);
 			this.game.getButtons().add(button);
 
 			text = "new Level";
@@ -183,17 +185,18 @@ public class ButtonProvider {
 			button.setFont(AssetLoader.font30);
 			this.game.getButtons().add(button);
 
-			text = "restart";
+			text = "";
 			function = Tiwanaku.FUNCTION_FINISH_RESTART;
 			width = 64;
 			height = 64;
 			x = Constants.GAME_WIDTH/2 - AssetLoader.hudRightTextureRegion.getRegionWidth()/2 - AssetLoader.wonTextureRegion.getRegionWidth()/2 + 55;
 			y = Constants.GAME_HEIGHT/2 + AssetLoader.wonTextureRegion.getRegionHeight()/2 - (height + 50);
 			button = new ApoButtonImageWithThree(x, y, width, height, function, text, AssetLoader.buttonRestartTextureRegion);
-			button.setFont(AssetLoader.font30);
+			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Restart");
+			button.setFont(AssetLoader.font15);
 			this.game.getButtons().add(button);
 
-			text = "back";
+			text = "";
 			function = Tiwanaku.FUNCTION_FINISH_BACK;
 			width = 64;
 			height = 64;
@@ -203,24 +206,26 @@ public class ButtonProvider {
 			button.setFont(AssetLoader.font30);
 			this.game.getButtons().add(button);
 
-			text = "fix";
+			text = "";
 			function = Tiwanaku.FUNCTION_FIX;
 			width = 64;
 			height = 64;
 			x = Constants.GAME_WIDTH - AssetLoader.hudRightTextureRegion.getRegionWidth() + 30;
 			y = 50;
 			button = new ApoButtonImageWithThree(x, y, width, height, function, text, AssetLoader.buttonFixTextureRegion);
-			button.setFont(AssetLoader.font25);
+			button.setFont(AssetLoader.font15);
+			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Fix set values");
 			this.game.getButtons().add(button);
 
-			text = "Help";
+			text = "";
 			function = Tiwanaku.FUNCTION_HELP;
 			width = 64;
 			height = 64;
 			x = Constants.GAME_WIDTH - width - 30;
 			y = 50;
 			button = new ApoButtonImageWithThree(x, y, width, height, function, text, AssetLoader.buttonHelpTextureRegion);
-			button.setFont(AssetLoader.font25);
+			button.setFont(AssetLoader.font15);
+			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Help");
 			this.game.getButtons().add(button);
 
 			text = "X";

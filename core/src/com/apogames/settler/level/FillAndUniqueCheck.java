@@ -82,6 +82,7 @@ public class FillAndUniqueCheck {
             maxLevel = 1;
         }
 
+        System.gc();
         //long startTime = System.nanoTime();
         this.algorithmX.createMatrix(this.myBackground, numbers, this.regionSize);
         AlgorithmXSolve solver = new AlgorithmXSolve();
@@ -92,6 +93,7 @@ public class FillAndUniqueCheck {
         //System.out.println("Solutions found: "+this.solutions.size()+" in "+(endTime-startTime)+" ns");
 
         if (foundSolution && maxLevel > 0) {
+            System.out.println("Level gefunden");
             do {
                 byte[][] startLevel = Helper.cloneArray(numbers);
                 boolean[][] visited = new boolean[startLevel.length][startLevel[0].length];
@@ -132,14 +134,15 @@ public class FillAndUniqueCheck {
 //        System.out.println("oldschool solutions found: "+solutions.size()+" in "+(endTime-startTime)+" ns");
 
         if (!foundSolution) {
-            System.out.println("Keine Lösung gefunden");
+            //System.out.println("Keine Lösung gefunden");
 //            System.out.println();
             return false;
         } else {
 //            System.out.println();
-            System.out.println("Found: "+this.solutions.size());
+            //System.out.println("Found: "+this.solutions.size());
 //            System.out.println();
 
+            //Helper.printArray(this.myBackground);
             this.allSolutions = new HashSet<>(this.solutions);
             this.allSolutionsArray = new byte[this.allSolutions.size()][][];
             //System.out.println("allSolutions: "+allSolutions.size());
@@ -534,7 +537,7 @@ public class FillAndUniqueCheck {
         if (x < 0 || x >= background[0].length || y < 0 || y >= background.length) {
             return false;
         }
-        return this.myBackground[y][x] == region && !visitedRegion[y][x];
+        return background[y][x] == region && !visitedRegion[y][x];
     }
 
     private boolean areNumbersValid(byte[][] numbers, int x, int y) {

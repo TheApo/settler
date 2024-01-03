@@ -195,6 +195,8 @@ public class Menu extends SequentiallyThinkingScreenModel {
         ApoButton buttonLeft = getMainPanel().getButtonByFunction(FUNCTION_LEVEL_LEFT);
         getMainPanel().drawString(Localization.getInstance().getCommon().get("menu_levelsize"), Constants.GAME_WIDTH/2f, buttonLeft.getY() - 20, Constants.COLOR_WHITE, AssetLoader.font25, DrawString.MIDDLE, true, false);
         getMainPanel().drawString(this.levelSize.toString(), Constants.GAME_WIDTH/2f, buttonLeft.getY() + buttonLeft.getHeight()/2 + 3, Constants.COLOR_WHITE, AssetLoader.font30, DrawString.MIDDLE, true, false);
+        String size = this.levelSize.getX() + " x " + this.levelSize.getY();
+        getMainPanel().drawString(size, Constants.GAME_WIDTH/2f, buttonLeft.getY() + buttonLeft.getHeight()/2 + 43, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.MIDDLE, true, false);
 
         ApoButton buttonDifficulty = getMainPanel().getButtonByFunction(FUNCTION_DIFFICULTY_LEFT);
         getMainPanel().drawString(Localization.getInstance().getCommon().get("menu_difficulty"), Constants.GAME_WIDTH/2f, buttonDifficulty.getY() - 20, Constants.COLOR_WHITE, AssetLoader.font25, DrawString.MIDDLE, true, false);

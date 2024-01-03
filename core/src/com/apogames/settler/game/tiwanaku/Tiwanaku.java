@@ -9,6 +9,7 @@ import com.apogames.settler.entity.ApoButton;
 import com.apogames.settler.game.MainPanel;
 import com.apogames.settler.level.LevelCreate;
 import com.apogames.settler.level.Level;
+import com.apogames.settler.level.NewLevelCreate;
 import com.apogames.settler.level.Solve;
 import com.apogames.settler.level.helper.Difficulty;
 import com.apogames.settler.level.helper.FillHelp;
@@ -39,7 +40,7 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
 
     private boolean isPressed = false;
 
-    private LevelCreate levelCreate;
+    private NewLevelCreate levelCreate;
 
     private Level level;
 
@@ -100,7 +101,8 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
     }
 
     private void createNewLevel() {
-        this.levelCreate = new LevelCreate(this.difficulty);
+        //this.levelCreate = new NewLevelCreate(this.difficulty);
+        this.levelCreate = new NewLevelCreate(this.difficulty);
 
         this.levelCreate.createLevel(this.levelSize.getX(), this.levelSize.getY(), this.levelSize.getFiveCount(), this.levelSize.getFourCount());
         this.level = this.levelCreate.getLevel();

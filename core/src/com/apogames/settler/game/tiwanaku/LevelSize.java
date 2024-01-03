@@ -4,10 +4,8 @@ public enum LevelSize {
     SUPERMINI(3,3,1,0),
     MINI(4,4,1,1),
     SMALL(5,5,3,3),
-    MEDIUM(6,5,4,4),
-    BIG(7,5,5,3),
-    HUGE(9,5,6,5),
-    WORLD(9,9,13,10);
+    MEDIUM(7,5,5,3),
+    BIG(9,5,6,5);
 
     private final int x;
     private final int y;

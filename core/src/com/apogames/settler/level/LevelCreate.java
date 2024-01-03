@@ -20,7 +20,13 @@ public class LevelCreate {
 
     public static void main(String[] args) {
         LevelCreate levelCreate = new LevelCreate(Difficulty.HARD);
-        levelCreate.createLevel(3, 3, 1, 0);
+        //levelCreate.createLevel(9, 9, 15, 20);
+        //long t = System.nanoTime();
+        for (int i = 0; i < 2; i++) {
+            levelCreate.createLevel(5, 5, 5, 5);
+            //levelCreate.createLevel(8, 8, 15, 15);
+        }
+        //System.out.println(System.nanoTime()-t);
     }
 
     public LevelCreate(Difficulty difficulty) {
@@ -38,16 +44,20 @@ public class LevelCreate {
 
     public void createLevel(int xSize, int ySize, int fiveCount, int fourCount) {
         this.init();
+
+        //long t = System.nanoTime();
         this.setBackground(xSize, ySize, fiveCount, fourCount);
 
         fillMissingNumbers();
+        //System.out.println("Nur Erstellung des Levels: "+(System.nanoTime()-t)+" ns");
+        //Helper.printArray(myBackground);
+        //System.out.println();
 
         if (!finished) {
             createLevel(xSize, ySize, fiveCount, fourCount);
         } else {
 //            System.out.println();
 //            Helper.printArray(this.myBackground);
-
             FillAndUniqueCheck fill = new FillAndUniqueCheck(this.difficulty);
             if (!fill.fillLevel(myBackground)) {
                 createLevel(xSize, ySize, fiveCount, fourCount);
@@ -92,7 +102,7 @@ public class LevelCreate {
                     boolean[][] visitedNow = new boolean[myBackground.length][myBackground[0].length];
                     ArrayList<Byte> possibleValues = getPossibleValues(x, y, visitedNow);
 
-                    if (possibleValues.size() == 0) {
+                    if (possibleValues.isEmpty()) {
                         return;
                     }
 
