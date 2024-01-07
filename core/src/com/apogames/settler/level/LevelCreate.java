@@ -22,9 +22,9 @@ public class LevelCreate {
         LevelCreate levelCreate = new LevelCreate(Difficulty.HARD);
         //levelCreate.createLevel(9, 9, 15, 20);
         //long t = System.nanoTime();
-        for (int i = 0; i < 2; i++) {
-            levelCreate.createLevel(5, 5, 5, 5);
-            //levelCreate.createLevel(8, 8, 15, 15);
+        for (int i = 0; i < 10; i++) {
+            //levelCreate.createLevel(9, 5, 9, 9);
+            levelCreate.createLevel(9, 9, 15, 20);
         }
         //System.out.println(System.nanoTime()-t);
     }

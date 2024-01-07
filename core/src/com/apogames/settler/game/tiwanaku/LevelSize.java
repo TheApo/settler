@@ -6,6 +6,7 @@ public enum LevelSize {
     SMALL(5,5,3,3),
     MEDIUM(7,5,5,3),
     BIG(9,5,6,5);
+    //SUPERBIG(9,9,6,5);
 
     private final int x;
     private final int y;

@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.GridPoint2;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 public class NewLevelCreate {
 
@@ -20,9 +21,9 @@ public class NewLevelCreate {
     public static void main(String[] args) {
         NewLevelCreate levelCreate = new NewLevelCreate(Difficulty.HARD);
         //long t = System.nanoTime();
-        for (int i = 0; i < 2; i++) {
-            //levelCreate.createLevel(5, 5, 9, 7);
-            levelCreate.createLevel(9, 9, 15, 15);
+        for (int i = 0; i < 100; i++) {
+            levelCreate.createLevel(9, 5, 9, 7);
+            //levelCreate.createLevel(9, 9, 15, 15);
         }
         //System.out.println(System.nanoTime()-t);
     }
@@ -138,29 +139,58 @@ public class NewLevelCreate {
                 }
             }
         }
-        //System.out.println();
+        //System.out.println("Ole");
         for (int y = 0; y < myBackground.length; y++) {
             for (int x = 0; x < myBackground[0].length; x++) {
-                if (myBackground[y][x] >= startCount) {
+                //if (myBackground[y][x] >= startCount) {
                     // only region size 1
-                    if (this.regionSize[y][x] == 1) {
+                    //if (this.regionSize[y][x] == 1) {
                         boolean[][] visited = new boolean[myBackground.length][myBackground[0].length];
                         visited[y][x] = true;
+                        fillVisitedWithMyValues(myBackground[y][x], visited, x, y);
+                        Set<Byte> check = new HashSet<>();
+                        check.add(myBackground[y][x]);
                         for (int nextY = -1; nextY <= 1; nextY += 1) {
                             for (int nextX = -1; nextX <= 1; nextX += 1) {
-                                if (nextX != x || nextY != y) {
-                                    if (isOnlyAround(x, y, nextX, nextY, visited, -1)) {
+                                if (nextX != 0 || nextY != 0) {
+                                    if (x + nextX < 0 || x + nextX >= myBackground[0].length || y + nextY < 0 || y + nextY >= myBackground.length) {
+                                        continue;
+                                    }
+                                    if (check.contains(myBackground[y+nextY][x+nextX])) {
+                                        continue;
+                                    }
+                                    check.add(myBackground[y+nextY][x+nextX]);
+                                    //if (isOnlyAround(x, y, nextX, nextY, visited, -1)) {
+                                    //    return false;
+                                    //}
+                                    if (fillVisitedWithMyValues(myBackground[y+nextY][x+nextX], visited, x, y) && (regionSize[y][x] == 1 || regionSize[y+nextY][x+nextX] >= regionSize[y][x])) {
                                         return false;
                                     }
                                 }
                             }
                         }
-                    }
-                }
+                   // }
+                //}
+
             }
         }
         //System.out.println();
         return true;
+    }
+
+    private boolean fillVisitedWithMyValues(byte value, boolean[][] visited, int checkX, int checkY) {
+        boolean result = true;
+        for (int y = 0; y < myBackground.length; y++) {
+            for (int x = 0; x < myBackground[0].length; x++) {
+                if (myBackground[y][x] == value) {
+                    visited[y][x] = true;
+                    if (Math.abs(checkX - x) > 1 || Math.abs(checkY - y) > 1) {
+                        result = false;
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     private int getRegionSize(int x, int y, int region, byte[][] background, boolean[][] visited) {

@@ -135,6 +135,8 @@ public class FillAndUniqueCheck {
 
         if (!foundSolution) {
             //System.out.println("Keine Lösung gefunden");
+            //Helper.printArray(this.myBackground);
+            //System.out.println();
 //            System.out.println();
             return false;
         } else {
