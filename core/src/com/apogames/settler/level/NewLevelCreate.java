@@ -19,13 +19,22 @@ public class NewLevelCreate {
     private int[][] regionSize;
 
     public static void main(String[] args) {
-        NewLevelCreate levelCreate = new NewLevelCreate(Difficulty.HARD);
-        //long t = System.nanoTime();
-        for (int i = 0; i < 100; i++) {
-            levelCreate.createLevel(9, 5, 9, 7);
-            //levelCreate.createLevel(9, 9, 15, 15);
-        }
-        //System.out.println(System.nanoTime()-t);
+//        NewLevelCreate levelCreate = new NewLevelCreate(Difficulty.HARD);
+//        long t = System.nanoTime();
+//        for (int i = 0; i < 100; i++) {
+//            //levelCreate.createLevel(5, 5, 9, 7);
+//            levelCreate.createLevel(7, 5, 15, 15);
+//        }
+//        System.out.println(System.nanoTime()-t);
+//        System.out.println();
+//
+//        LevelCreate oldLevelCreate = new LevelCreate(Difficulty.HARD);
+//        t = System.nanoTime();
+//        for (int i = 0; i < 100; i++) {
+//            //oldLevelCreate.createLevel(5, 5, 9, 7);
+//            oldLevelCreate.createLevel(7, 5, 15, 15);
+//        }
+//        System.out.println(System.nanoTime()-t);
     }
 
     public NewLevelCreate(Difficulty difficulty) {
@@ -49,18 +58,13 @@ public class NewLevelCreate {
         //Helper.printArray(this.myBackground);
         //System.out.println();
 
-        if (!finished) {
+        FillAndUniqueCheck fill = new FillAndUniqueCheck(this.difficulty);
+        if (!fill.fillLevel(myBackground)) {
             createLevel(xSize, ySize, fiveCount, fourCount);
         } else {
-//            System.out.println();
-//            Helper.printArray(this.myBackground);
-            FillAndUniqueCheck fill = new FillAndUniqueCheck(this.difficulty);
-            if (!fill.fillLevel(myBackground)) {
-                createLevel(xSize, ySize, fiveCount, fourCount);
-            } else {
-                this.level = fill.getLevel();
-                this.finished = true;
-            }
+            this.level = fill.getLevel();
+            this.finished = true;
+            //System.out.println("FOUND");
         }
     }
 
@@ -139,43 +143,38 @@ public class NewLevelCreate {
                 }
             }
         }
-        //System.out.println("Ole");
+
         for (int y = 0; y < myBackground.length; y++) {
             for (int x = 0; x < myBackground[0].length; x++) {
-                //if (myBackground[y][x] >= startCount) {
-                    // only region size 1
-                    //if (this.regionSize[y][x] == 1) {
-                        boolean[][] visited = new boolean[myBackground.length][myBackground[0].length];
-                        visited[y][x] = true;
-                        fillVisitedWithMyValues(myBackground[y][x], visited, x, y);
-                        Set<Byte> check = new HashSet<>();
-                        check.add(myBackground[y][x]);
-                        for (int nextY = -1; nextY <= 1; nextY += 1) {
-                            for (int nextX = -1; nextX <= 1; nextX += 1) {
-                                if (nextX != 0 || nextY != 0) {
-                                    if (x + nextX < 0 || x + nextX >= myBackground[0].length || y + nextY < 0 || y + nextY >= myBackground.length) {
-                                        continue;
-                                    }
-                                    if (check.contains(myBackground[y+nextY][x+nextX])) {
-                                        continue;
-                                    }
-                                    check.add(myBackground[y+nextY][x+nextX]);
-                                    //if (isOnlyAround(x, y, nextX, nextY, visited, -1)) {
-                                    //    return false;
-                                    //}
-                                    if (fillVisitedWithMyValues(myBackground[y+nextY][x+nextX], visited, x, y) && (regionSize[y][x] == 1 || regionSize[y+nextY][x+nextX] >= regionSize[y][x])) {
-                                        return false;
-                                    }
-                                }
+                boolean[][] visited = new boolean[myBackground.length][myBackground[0].length];
+                visited[y][x] = true;
+                fillVisitedWithMyValues(myBackground[y][x], visited, x, y);
+                Set<Byte> check = new HashSet<>();
+                check.add(myBackground[y][x]);
+                for (int nextY = -1; nextY <= 1; nextY += 1) {
+                    for (int nextX = -1; nextX <= 1; nextX += 1) {
+                        if (nextX != 0 || nextY != 0) {
+                            if (x + nextX < 0 || x + nextX >= myBackground[0].length || y + nextY < 0 || y + nextY >= myBackground.length) {
+                                continue;
+                            }
+                            if (check.contains(myBackground[y+nextY][x+nextX])) {
+                                continue;
+                            }
+                            check.add(myBackground[y+nextY][x+nextX]);
+                            if (fillVisitedWithMyValues(myBackground[y+nextY][x+nextX], visited, x, y) && (regionSize[y][x] == 1 || regionSize[y+nextY][x+nextX] >= regionSize[y][x])) {
+                                return false;
                             }
                         }
-                   // }
-                //}
+                    }
+                }
 
             }
         }
-        //System.out.println();
-        return true;
+
+        PossibleValueCheck value = new PossibleValueCheck(myBackground, regionSize);
+        boolean result = value.isSolveable();
+
+        return result;
     }
 
     private boolean fillVisitedWithMyValues(byte value, boolean[][] visited, int checkX, int checkY) {

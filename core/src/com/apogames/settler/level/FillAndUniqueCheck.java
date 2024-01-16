@@ -134,14 +134,14 @@ public class FillAndUniqueCheck {
 //        System.out.println("oldschool solutions found: "+solutions.size()+" in "+(endTime-startTime)+" ns");
 
         if (!foundSolution) {
-            //System.out.println("Keine Lösung gefunden");
+            System.out.println("Keine Lösung gefunden");
             //Helper.printArray(this.myBackground);
             //System.out.println();
 //            System.out.println();
             return false;
         } else {
 //            System.out.println();
-            //System.out.println("Found: "+this.solutions.size());
+            System.out.println("Found: "+this.solutions.size());
 //            System.out.println();
 
             //Helper.printArray(this.myBackground);
