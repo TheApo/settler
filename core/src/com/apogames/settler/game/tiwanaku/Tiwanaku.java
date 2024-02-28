@@ -56,6 +56,8 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
 
     private Difficulty difficulty;
 
+    private byte[][] error = null;
+
     public Tiwanaku(final MainPanel game) {
         super(game);
     }
@@ -154,6 +156,9 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
             this.addY < mouseY && this.addY + tileSize * this.level.getBackground().length > mouseY) {
             int x = (mouseX - this.addX - addXScale) / tileSize;
             int y = (mouseY - this.addY) / tileSize;
+            if (this.error != null) {
+                this.error = null;
+            }
             if (this.level.getFixedNumbers()[y][x] == 0) {
                 byte add = (byte) (isRightButton ? -1 : 1);
                 this.level.getCurNumber()[y][x] = (byte) (this.level.getCurNumber()[y][x] + add);
@@ -213,9 +218,14 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
                 saveCurrentFixLevel();
                 break;
             case Tiwanaku.FUNCTION_HELP:
-                this.help = !this.help;
+                //this.help = !this.help;
+                checkLevel();
                 break;
         }
+    }
+
+    private void checkLevel() {
+        this.error = this.level.getError();
     }
 
     private void saveCurrentFixLevel() {
@@ -311,7 +321,11 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
                     }
                     //getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + tileSizeWidth/2f, addY + y * tileSizeWidth + tileSizeWidth/2f, Constants.COLOR_WHITE, AssetLoader.font40, DrawString.MIDDLE, true, false);
 
-                    getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + addXScale + tileSizeWidth/2f, addY + y * tileSizeWidth + tileSizeWidth/2f + 4, Constants.COLOR_BLACK, font40, DrawString.MIDDLE, true, false);
+                    float[] color = Constants.COLOR_BLACK;
+                    if (this.error != null && this.error[y][x] > 0) {
+                        color = Constants.COLOR_RED;
+                    }
+                    getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + addXScale + tileSizeWidth/2f, addY + y * tileSizeWidth + tileSizeWidth/2f + 4, color, font40, DrawString.MIDDLE, true, false);
                 }
 
                 if (this.help && this.level.getCurNumber()[y][x] == 0) {

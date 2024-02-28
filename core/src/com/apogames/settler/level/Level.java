@@ -75,6 +75,58 @@ public class Level {
         return true;
     }
 
+    public byte[][] getError() {
+        byte[][] error = new byte[this.curNumber.length][this.curNumber[0].length];
+        for (int y = 0; y < this.curNumber.length; y++) {
+            for (int x = 0; x < this.curNumber[0].length; x++) {
+                if (this.curNumber[y][x] != 0 && hasNeighborSameValue(x, y, error)) {
+                    return error;
+                }
+            }
+        }
+        return error;
+    }
+
+    private boolean hasNeighborSameValue(int startX, int startY, byte[][] error) {
+        if (isNeighborSame(startX, startY, -1, -1, error)) {
+            return true;
+        }
+        if (isNeighborSame(startX, startY, -1, 0, error)) {
+            return true;
+        }
+        if (isNeighborSame(startX, startY, -1, +1, error)) {
+            return true;
+        }
+        if (isNeighborSame(startX, startY, 0, -1, error)) {
+            return true;
+        }
+        if (isNeighborSame(startX, startY, 0, +1, error)) {
+            return true;
+        }
+        if (isNeighborSame(startX, startY, +1, -1, error)) {
+            return true;
+        }
+        if (isNeighborSame(startX, startY, +1, 0, error)) {
+            return true;
+        }
+        if (isNeighborSame(startX, startY, +1, +1, error)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isNeighborSame(int startX, int startY, int addX, int addY, byte[][] error) {
+        if (startX + addX >= 0 && startX + addX < this.curNumber[0].length && startY + addY >= 0 && startY + addY < this.curNumber.length) {
+            if (this.curNumber[startY + addY][startX + addX] == this.curNumber[startY][startX]) {
+                error[startY][startX] = 1;
+                error[startY + addY][startX + addX] = 1;
+                return true;
+            }
+        }
+        return false;
+    }
+
     public byte[][] getFixedNumbers() {
         return fixedNumbers;
     }
