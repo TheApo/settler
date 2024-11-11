@@ -1,4 +1,5 @@
 d:assets:assets:0:application/unknown:1
+t:assets.txt:assets-d856315ff799fdb77ebc65f4900133e7.txt:889:text/plain:1
 d:fonts:fonts:0:application/unknown:1
 b:fonts/logic.ttf:fonts/logic-d28846a44b4a8a7c31066018c7b13aec.ttf:215092:application/unknown:1
 b:fonts/OpenSans.ttf:fonts/OpenSans-629a55a7e793da068dc580d184cc0e31.ttf:217360:application/unknown:1
@@ -33,7 +34,7 @@ i:images/buttons_left.png:images/buttons_left-b66faeed634b24ab4bf303db39f191fe.p
 i:images/buttons_restart.png:images/buttons_restart-4b8f96297c2979419ce0279e18aaaf04.png:4567:image/png:1
 i:images/buttons_right.png:images/buttons_right-7542b169e47811ef4a5dbdd3dae3d185.png:2874:image/png:1
 i:images/buttons_x.png:images/buttons_x-3253acc790744958892b5b46a2b4466f.png:4234:image/png:1
-i:images/circles.png:images/circles-47bd8cd002dfd7ebf70848cc4184f4a5.png:11896:image/png:1
+i:images/circles.png:images/circles-b65657566f2b925273a4f894b425a58b.png:11874:image/png:1
 i:images/desertDunes00.png:images/desertDunes00-d09f4ff5b3791f54c5e5885c519eabd8.png:122793:image/png:1
 i:images/forestBroadleaf00.png:images/forestBroadleaf00-d9478f2641853792e075c288ba642446.png:154772:image/png:1
 i:images/hud_menu.png:images/hud_menu-3cc2aa6685afd59ab366890f4e37d324.png:21263:image/png:1
@@ -51,4 +52,4 @@ t:com/badlogic/gdx/graphics/g3d/shaders/default.vertex.glsl:default.vertex-28b7e
 t:com/badlogic/gdx/graphics/g3d/shaders/depth.fragment.glsl:depth.fragment-8341d5ce47fc398da575c9e294b6821b.glsl:869:application/unknown:1
 t:com/badlogic/gdx/graphics/g3d/shaders/depth.vertex.glsl:depth.vertex-98a450f1f747c05eedb7122779187316.glsl:2931:application/unknown:1
 t:com/badlogic/gdx/utils/lsans-15.fnt:lsans-15-5143ae9583bc43b1084f98062e054ae8.fnt:17711:application/unknown:1
-i:com/badlogic/gdx/utils/lsans-15.png:lsans-15-afe63790f9c73ea9a111fd9843835d21.png:14652:image/png:1
+i:com/badlogic/gdx/utils/lsans-15.png:lsans-15-8e00ff5b9dd15a3c18c1eb75f68c695a.png:10270:image/png:1

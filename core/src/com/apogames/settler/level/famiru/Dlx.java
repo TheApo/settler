@@ -15,7 +15,7 @@ public class Dlx<T> {
     private final boolean countAllSolutions;
     private final int statusLogStepWidth;
     private final AtomicReference<State> state = new AtomicReference<>(State.INITIALIZING);
-    private final CountDownLatch solvedLatch = new CountDownLatch(1);
+    //private final CountDownLatch solvedLatch = new CountDownLatch(1);
     private final List<List<T>> solutions = new ArrayList<>();
     // fields for statistics
     private final int numberOfSecondaryConstraints;
@@ -148,16 +148,16 @@ public class Dlx<T> {
                 System.out.println("Found "+solutionsFound+" solutions");
             } finally {
                 state.compareAndSet(State.SOLVING, State.SOLVED);
-                solvedLatch.countDown();
+                //solvedLatch.countDown();
             }
         }
 
-        try {
-            solvedLatch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
+//        try {
+//            solvedLatch.await();
+//        } catch (InterruptedException e) {
+//            //Thread.currentThread().interrupt();
+//            throw new RuntimeException(e);
+//        }
 
         checkBrokenState();
 
@@ -223,7 +223,7 @@ public class Dlx<T> {
 
     private void markBroken() {
         state.set(State.BROKEN);
-        solvedLatch.countDown();
+        //solvedLatch.countDown();
     }
 
     private void checkBrokenState() {
@@ -255,7 +255,7 @@ public class Dlx<T> {
     }
 
     private List<Long> mapToList(long[] array) {
-        return Arrays.stream(array).boxed().toList();
+        return Arrays.stream(array).boxed().collect(Collectors.toList());
     }
 
     private enum State {
