@@ -146,7 +146,6 @@ public class Dlx<T> {
             try {
                 search(0);
                 System.out.println("Found "+solutionsFound+" solutions");
-                System.out.println(this.solutions.get(0));
             } finally {
                 state.compareAndSet(State.SOLVING, State.SOLVED);
                 solvedLatch.countDown();

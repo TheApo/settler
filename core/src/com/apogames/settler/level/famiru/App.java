@@ -22,6 +22,10 @@ public class App {
     private final int height;
     private final int numberOfFieldFilledConstraints;
 
+    public App(byte[][] level) {
+        this(Helper.getStringList(level));
+    }
+
     public App(List<String> level) {
         this.level = level;
         width = getWidth();
@@ -128,15 +132,35 @@ public class App {
         return level.size();
     }
 
-    private void run() {
+    public ArrayList<byte[][]> run() {
+        return run(10, true);
+    }
+
+    public ArrayList<byte[][]> run(int maxNumberOfSolutionsToStore, boolean countAllSolutions) {
         int secondaryConstraints = (width - 1) * (height - 1) * maxBiomeSize;
-        Dlx<ChoiceInfo> dlx = new Dlx<>(numberOfFieldFilledConstraints * 2, secondaryConstraints, 10, true, 1000000);
+        Dlx<ChoiceInfo> dlx = new Dlx<>(numberOfFieldFilledConstraints * 2, secondaryConstraints, maxNumberOfSolutionsToStore, countAllSolutions, 1000000);
         createChoices(dlx);
         dlx.solve();
+
+        ArrayList<byte[][]> result = new ArrayList<>();
+        for (List<ChoiceInfo> currentLevel : dlx.getSolutions()) {
+            byte[][] level = new byte[height][width];
+            for (ChoiceInfo info : currentLevel) {
+                level[info.y][info.x] = (byte)info.number;
+            }
+            result.add(level);
+        }
+
         printSolutions(dlx);
+
+        return result;
     }
 
     private void printSolutions(Dlx<ChoiceInfo> dlx) {
+        if (dlx.getSolutions().isEmpty()) {
+            return;
+        }
+
         System.out.println();
         for (String level : this.level) {
             System.out.println(level);

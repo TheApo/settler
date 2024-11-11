@@ -2,6 +2,7 @@ package com.apogames.settler.level;
 
 import com.apogames.settler.level.algorithmX.AlgorithmX;
 import com.apogames.settler.level.algorithmX.AlgorithmXSolve;
+import com.apogames.settler.level.famiru.App;
 import com.apogames.settler.level.helper.Difficulty;
 import com.apogames.settler.level.helper.Helper;
 import com.apogames.settler.level.helper.LastSaveSpots;
@@ -77,22 +78,27 @@ public class FillAndUniqueCheck {
 //        System.out.println("Starte mit fillNumbers in das Level");
 //        System.out.println();
 
-        int maxLevel = -1;
+        boolean countAllSolutions = false;
+        int maxLevel = 1000000;
         if (this.myBackground.length * this.myBackground[0].length > 31) {
             maxLevel = 1;
         }
 
         System.gc();
         //long startTime = System.nanoTime();
-        this.algorithmX.createMatrix(this.myBackground, numbers, this.regionSize);
-        AlgorithmXSolve solver = new AlgorithmXSolve();
-        ArrayList<byte[][]> solutionArray = solver.run(myBackground[0].length, myBackground.length, this.algorithmX.getMatrix(), maxLevel);
+//        this.algorithmX.createMatrix(this.myBackground, numbers, this.regionSize);
+//        AlgorithmXSolve solver = new AlgorithmXSolve();
+//        ArrayList<byte[][]> solutionArray = solver.run(myBackground[0].length, myBackground.length, this.algorithmX.getMatrix(), maxLevel);
+
+        App solver = new App(this.myBackground);
+        ArrayList<byte[][]> solutionArray = solver.run(maxLevel, countAllSolutions);
+
         //long endTime = System.nanoTime();
-        foundSolution = solutionArray.size() != 0;
+        foundSolution = !solutionArray.isEmpty();
         this.solutions = solutionArray;
         //System.out.println("Solutions found: "+this.solutions.size()+" in "+(endTime-startTime)+" ns");
 
-        if (foundSolution && maxLevel > 0) {
+        if (foundSolution && maxLevel == 1) {
             System.out.println("Level gefunden");
             do {
                 byte[][] startLevel = Helper.cloneArray(numbers);
@@ -103,10 +109,12 @@ public class FillAndUniqueCheck {
 
                 //startTime = System.nanoTime();
                 this.algorithmX.createMatrix(this.myBackground, numbers, this.regionSize);
-                solver = new AlgorithmXSolve();
-                solutionArray = solver.run(myBackground[0].length, myBackground.length, this.algorithmX.getMatrix(), 10000);
+//                solver = new AlgorithmXSolve();
+//                solutionArray = solver.run(myBackground[0].length, myBackground.length, this.algorithmX.getMatrix(), 10000);
+                solver = new App(this.myBackground);
+                solutionArray = solver.run(100000, countAllSolutions);
                 //endTime = System.nanoTime();
-                foundSolution = solutionArray.size() != 0;
+                foundSolution = !solutionArray.isEmpty();
                 this.solutions = solutionArray;
                 //System.out.println("filled Solutions found: " + this.solutions.size() + " in " + (endTime - startTime) + " ns");
             } while (!foundSolution);

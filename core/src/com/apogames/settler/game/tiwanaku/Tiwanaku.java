@@ -218,8 +218,8 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
                 saveCurrentFixLevel();
                 break;
             case Tiwanaku.FUNCTION_HELP:
-                //this.help = !this.help;
-                checkLevel();
+                this.help = !this.help;
+                //checkLevel();
                 break;
         }
     }

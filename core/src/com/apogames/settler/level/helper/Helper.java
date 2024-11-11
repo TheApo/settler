@@ -1,5 +1,8 @@
 package com.apogames.settler.level.helper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Helper {
 
     public static int[][] cloneArray(int[][] numbers) {
@@ -63,6 +66,18 @@ public class Helper {
             }
             System.out.println();
         }
+    }
+
+    public static List<String> getStringList(byte[][] level) {
+        List<String> needed = new ArrayList<>();
+        for (int i = 0; i < level.length; i++) {
+            StringBuilder s = new StringBuilder();
+            for (int j = 0; j < level[0].length; j++) {
+                s.append(level[i][j]);
+            }
+            needed.add(s.toString());
+        }
+        return needed;
     }
 
     public static boolean canPlaceValue(int x, int y, int value, boolean[][] visited, byte[][] background) {

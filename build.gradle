@@ -10,8 +10,8 @@ buildscript {
     }
     dependencies {
         classpath 'org.wisepersist:gwt-gradle-plugin:1.1.16'
-        classpath 'org.gretty:gretty:3.0.7'
-        classpath 'com.android.tools.build:gradle:7.4.1'
+        classpath 'org.gretty:gretty:4.1.5'
+        classpath 'com.android.tools.build:gradle:7.4.2'
         
 
     }
@@ -23,12 +23,12 @@ allprojects {
     version = '1.0'
     ext {
         appName = "Tiwanaku"
-        gdxVersion = '1.11.0'
+        gdxVersion = '1.13.0'
         roboVMVersion = '2.3.16'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
-        gdxControllersVersion = '2.2.1'
+        gdxControllersVersion = '2.2.3'
     }
 
     repositories {
