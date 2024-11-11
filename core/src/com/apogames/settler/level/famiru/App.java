@@ -6,7 +6,7 @@ import java.util.*;
 
 public class App {
 
-    private static final List<String> LEVEL = List.of(
+    private static final List<String> LEVEL = Arrays.asList(
             "443334441",
             "442344211",
             "422111214",
@@ -39,10 +39,10 @@ public class App {
     }
 
     public static void main(String[] args) {
-        long start = System.nanoTime();
+        //long start = System.nanoTime();
         new App(LEVEL).run();
-        long durationInNs = System.nanoTime() - start;
-        System.out.println("Took "+durationInNs+" ns.");
+        //long durationInNs = System.nanoTime() - start;
+        //System.out.println("Took "+durationInNs+" ns.");
     }
 
     private int findMaxBiomeSize() {

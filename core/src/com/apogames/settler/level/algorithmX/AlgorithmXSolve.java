@@ -9,10 +9,10 @@ import java.util.HashSet;
 public class AlgorithmXSolve {
 
     public static void main(String[] args) {
-        long t = System.nanoTime();
+        //long t = System.nanoTime();
         AlgorithmXSolve algorithmXSolve = new AlgorithmXSolve();
         algorithmXSolve.run(9, 5);
-        System.out.println((System.nanoTime() - t)+" ns");
+        //System.out.println((System.nanoTime() - t)+" ns");
     }
 
     private ColumnNode root = null;
