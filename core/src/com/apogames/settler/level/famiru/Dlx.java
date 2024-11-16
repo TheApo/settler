@@ -165,6 +165,9 @@ public class Dlx<T> {
     }
 
     private boolean search(int k) {
+        if (solutionsFound >= maxNumberOfSolutionsToStore) {
+            return true;
+        }
         if (head.getRight() == head) {
             return doSolutionBookkeeping();
         }

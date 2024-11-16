@@ -11,10 +11,11 @@ public class Settler extends Game {
 	public void create () {
 		AssetLoader.load();
 		setScreen(new MainPanel());
-		if (Constants.IS_HTML) {
-			Gdx.graphics.setContinuousRendering(false);
-			Gdx.graphics.requestRendering();
-		}
+		Gdx.graphics.setContinuousRendering(false);
+		Gdx.graphics.requestRendering();
+//		if (Constants.IS_HTML) {
+//
+//		}
 	}
 
 	@Override
