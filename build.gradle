@@ -10,7 +10,7 @@ buildscript {
     dependencies {
         classpath 'org.wisepersist:gwt-gradle-plugin:1.1.16'
         classpath 'org.gretty:gretty:4.1.5'
-        classpath 'com.android.tools.build:gradle:8.5.2'
+        classpath 'com.android.tools.build:gradle:8.12.0'
         
 
     }
@@ -28,6 +28,7 @@ allprojects {
         ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
         gdxControllersVersion = '2.2.4'
+        gdxTeaVMVersion = '1.5.3'
     }
 
     repositories {
@@ -85,12 +86,24 @@ project(":html") {
     }
 }
 
+project(":teavm") {
+    apply plugin: "java-library"
+
+    sourceSets.main.java.srcDirs = ["src/"]
+    sourceSets.main.resources.srcDirs = ["../assets"]
+
+    dependencies {
+        implementation project(":core")
+        implementation "com.github.xpenatan.gdx-teavm:backend-web:$gdxTeaVMVersion"
+    }
+}
+
 project(":core") {
     apply plugin: "java-library"
 
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        
+
     }
 }
