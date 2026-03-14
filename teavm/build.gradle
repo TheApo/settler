@@ -10,6 +10,12 @@ tasks.register('buildRelease', JavaExec) {
     description = 'Build TeaVM release'
     mainClass.set('com.apogames.settler.teavm.TeaVMBuilder')
     classpath = sourceSets.main.runtimeClasspath
+    doLast {
+        copy {
+            from 'webapp/index.html'
+            into 'build/dist/webapp'
+        }
+    }
 }
 
 tasks.register('run', JavaExec) {
@@ -18,4 +24,10 @@ tasks.register('run', JavaExec) {
     mainClass.set('com.apogames.settler.teavm.TeaVMBuilder')
     classpath = sourceSets.main.runtimeClasspath
     args '--serve'
+    doLast {
+        copy {
+            from 'webapp/index.html'
+            into 'build/dist/webapp'
+        }
+    }
 }

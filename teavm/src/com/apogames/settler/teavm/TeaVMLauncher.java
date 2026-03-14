@@ -13,6 +13,9 @@ public class TeaVMLauncher {
         config.height = 0;
         config.antialiasing = true;
         config.showDownloadLogs = true;
+        config.preloadListener = assetLoader -> {
+            assetLoader.loadScript("freetype.js");
+        };
         new WebApplication(new Settler(), config);
     }
 }
