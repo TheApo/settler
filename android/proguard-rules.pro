@@ -33,6 +33,7 @@
 # Required if using Box2D extension
 -keepclassmembers class com.badlogic.gdx.physics.box2d.World {
    boolean contactFilter(long, long);
+   boolean getUseDefaultContactFilter();
    void    beginContact(long);
    void    endContact(long);
    void    preSolve(long, long);
