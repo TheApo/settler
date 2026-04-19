@@ -23,8 +23,8 @@ android {
         }
     }
     defaultConfig {
-        applicationId "com.apogames.settler"
-        minSdk 34
+        applicationId "com.apogames.tiwanaku"
+        minSdk 28
         targetSdk 35
         versionCode 1
         versionName "1.0"
@@ -33,10 +33,22 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    signingConfigs {
+        release {
+            def keystorePath = project.findProperty('SETTLER_KEYSTORE_PATH')
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword project.findProperty('SETTLER_KEYSTORE_PASSWORD') ?: ''
+                keyAlias project.findProperty('SETTLER_KEY_ALIAS') ?: 'settler'
+                keyPassword project.findProperty('SETTLER_KEY_PASSWORD') ?: ''
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -92,7 +104,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.apogames.settler/com.apogames.settler.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.apogames.tiwanaku/com.apogames.settler.AndroidLauncher'
 }
 
 eclipse.project.name = appName + "-android"
