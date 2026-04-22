@@ -110,6 +110,8 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
         this.level = this.levelCreate.getLevel();
         this.setSolve();
         this.gameState = GameState.PLAY;
+        this.help = false;
+        this.error = null;
 
         this.getMainPanel().getButtonByFunction(FUNCTION_NEW_LEVEL).setVisible(true);
 
@@ -156,9 +158,6 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
             this.addY < mouseY && this.addY + tileSize * this.level.getBackground().length > mouseY) {
             int x = (mouseX - this.addX - addXScale) / tileSize;
             int y = (mouseY - this.addY) / tileSize;
-            if (this.error != null) {
-                this.error = null;
-            }
             if (this.level.getFixedNumbers()[y][x] == 0) {
                 byte add = (byte) (isRightButton ? -1 : 1);
                 this.level.getCurNumber()[y][x] = (byte) (this.level.getCurNumber()[y][x] + add);
@@ -171,6 +170,8 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
                 this.setSolve();
                 if (this.level.isSolved()) {
                     this.gameSolved();
+                } else {
+                    this.updateError();
                 }
             }
         }
@@ -219,13 +220,17 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
                 break;
             case Tiwanaku.FUNCTION_HELP:
                 this.help = !this.help;
-                //checkLevel();
+                this.updateError();
                 break;
         }
     }
 
-    private void checkLevel() {
-        this.error = this.level.getError();
+    private void updateError() {
+        if (this.help || this.level.isFull()) {
+            this.error = this.level.getError();
+        } else {
+            this.error = null;
+        }
     }
 
     private void saveCurrentFixLevel() {
@@ -236,6 +241,7 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
         this.level.restart();
         this.gameState = GameState.PLAY;
         this.help = false;
+        this.error = null;
         this.setNeededButtonsVisible();
     }
 

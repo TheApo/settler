@@ -79,52 +79,77 @@ public class Level {
         byte[][] error = new byte[this.curNumber.length][this.curNumber[0].length];
         for (int y = 0; y < this.curNumber.length; y++) {
             for (int x = 0; x < this.curNumber[0].length; x++) {
-                if (this.curNumber[y][x] != 0 && hasNeighborSameValue(x, y, error)) {
-                    return error;
+                if (this.curNumber[y][x] != 0) {
+                    markNeighborSameValue(x, y, error);
+                    markSameValueInBiome(x, y, error);
                 }
             }
         }
         return error;
     }
 
-    private boolean hasNeighborSameValue(int startX, int startY, byte[][] error) {
-        if (isNeighborSame(startX, startY, -1, -1, error)) {
-            return true;
+    private void markSameValueInBiome(int startX, int startY, byte[][] error) {
+        byte biome = this.background[startY][startX];
+        if (biome <= 0) {
+            return;
         }
-        if (isNeighborSame(startX, startY, -1, 0, error)) {
-            return true;
-        }
-        if (isNeighborSame(startX, startY, -1, +1, error)) {
-            return true;
-        }
-        if (isNeighborSame(startX, startY, 0, -1, error)) {
-            return true;
-        }
-        if (isNeighborSame(startX, startY, 0, +1, error)) {
-            return true;
-        }
-        if (isNeighborSame(startX, startY, +1, -1, error)) {
-            return true;
-        }
-        if (isNeighborSame(startX, startY, +1, 0, error)) {
-            return true;
-        }
-        if (isNeighborSame(startX, startY, +1, +1, error)) {
-            return true;
-        }
-
-        return false;
+        byte value = this.curNumber[startY][startX];
+        boolean[][] visited = new boolean[this.curNumber.length][this.curNumber[0].length];
+        visited[startY][startX] = true;
+        visitBiome(startX, startY, biome, value, startX, startY, visited, error);
     }
 
-    private boolean isNeighborSame(int startX, int startY, int addX, int addY, byte[][] error) {
+    private void visitBiome(int x, int y, byte biome, byte value, int startX, int startY, boolean[][] visited, byte[][] error) {
+        stepBiome(x + 1, y, biome, value, startX, startY, visited, error);
+        stepBiome(x - 1, y, biome, value, startX, startY, visited, error);
+        stepBiome(x, y + 1, biome, value, startX, startY, visited, error);
+        stepBiome(x, y - 1, biome, value, startX, startY, visited, error);
+    }
+
+    private void stepBiome(int x, int y, byte biome, byte value, int startX, int startY, boolean[][] visited, byte[][] error) {
+        if (x < 0 || x >= this.curNumber[0].length || y < 0 || y >= this.curNumber.length) {
+            return;
+        }
+        if (visited[y][x] || this.background[y][x] != biome) {
+            return;
+        }
+        visited[y][x] = true;
+        if (this.curNumber[y][x] == value) {
+            error[startY][startX] = 1;
+            error[y][x] = 1;
+        }
+        visitBiome(x, y, biome, value, startX, startY, visited, error);
+    }
+
+    public boolean isFull() {
+        for (int y = 0; y < this.curNumber.length; y++) {
+            for (int x = 0; x < this.curNumber[0].length; x++) {
+                if (this.background[y][x] > 0 && this.curNumber[y][x] == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void markNeighborSameValue(int startX, int startY, byte[][] error) {
+        markIfNeighborSame(startX, startY, -1, -1, error);
+        markIfNeighborSame(startX, startY, -1, 0, error);
+        markIfNeighborSame(startX, startY, -1, +1, error);
+        markIfNeighborSame(startX, startY, 0, -1, error);
+        markIfNeighborSame(startX, startY, 0, +1, error);
+        markIfNeighborSame(startX, startY, +1, -1, error);
+        markIfNeighborSame(startX, startY, +1, 0, error);
+        markIfNeighborSame(startX, startY, +1, +1, error);
+    }
+
+    private void markIfNeighborSame(int startX, int startY, int addX, int addY, byte[][] error) {
         if (startX + addX >= 0 && startX + addX < this.curNumber[0].length && startY + addY >= 0 && startY + addY < this.curNumber.length) {
             if (this.curNumber[startY + addY][startX + addX] == this.curNumber[startY][startX]) {
                 error[startY][startX] = 1;
                 error[startY + addY][startX + addX] = 1;
-                return true;
             }
         }
-        return false;
     }
 
     public byte[][] getFixedNumbers() {
