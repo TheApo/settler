@@ -159,6 +159,7 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
             int x = (mouseX - this.addX - addXScale) / tileSize;
             int y = (mouseY - this.addY) / tileSize;
             if (this.level.getFixedNumbers()[y][x] == 0) {
+                this.error = null;
                 byte add = (byte) (isRightButton ? -1 : 1);
                 this.level.getCurNumber()[y][x] = (byte) (this.level.getCurNumber()[y][x] + add);
                 if (this.level.getCurNumber()[y][x] > this.level.getRegion()[y][x]) {
