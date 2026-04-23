@@ -6,13 +6,11 @@ public class Level {
     private final byte[][] background;
     private final byte[][] startLevel;
     private final byte[][] numbers;
-    private byte[][] fixedNumbers;
 
     private byte[][] curNumber;
     private byte[][] curBackground;
     private byte[][] region;
-
-    private boolean fixed;
+    private byte[][] hints;
 
     public Level(byte[][] background, byte[][] numbers, byte[][] startLevel) {
         this.background = background;
@@ -24,7 +22,7 @@ public class Level {
 
     public void init() {
         this.curNumber = Helper.cloneArray(startLevel);
-        this.fixedNumbers = Helper.cloneArray(startLevel);
+        this.hints = new byte[startLevel.length][startLevel[0].length];
 
         this.curBackground = Helper.cloneArray(startLevel);
         for (int y = 0; y < this.curBackground.length; y++) {
@@ -62,6 +60,22 @@ public class Level {
 
     public void setRegion(byte[][] region) {
         this.region = region;
+    }
+
+    public byte[][] getHints() {
+        return hints;
+    }
+
+    public boolean hasHint(int x, int y, int value) {
+        return (hints[y][x] & (1 << (value - 1))) != 0;
+    }
+
+    public void toggleHint(int x, int y, int value) {
+        hints[y][x] ^= (1 << (value - 1));
+    }
+
+    public void clearHints(int x, int y) {
+        hints[y][x] = 0;
     }
 
     public boolean isSolved() {
@@ -121,6 +135,32 @@ public class Level {
         visitBiome(x, y, biome, value, startX, startY, visited, error);
     }
 
+    public boolean hasClueInBiomeOf(int x, int y, int value) {
+        byte biome = this.background[y][x];
+        if (biome <= 0) {
+            return false;
+        }
+        boolean[][] visited = new boolean[this.background.length][this.background[0].length];
+        return visitForClue(x, y, biome, (byte) value, visited);
+    }
+
+    private boolean visitForClue(int x, int y, byte biome, byte value, boolean[][] visited) {
+        if (x < 0 || y < 0 || x >= this.background[0].length || y >= this.background.length) {
+            return false;
+        }
+        if (visited[y][x] || this.background[y][x] != biome) {
+            return false;
+        }
+        visited[y][x] = true;
+        if (this.startLevel[y][x] == value) {
+            return true;
+        }
+        return visitForClue(x + 1, y, biome, value, visited)
+            || visitForClue(x - 1, y, biome, value, visited)
+            || visitForClue(x, y + 1, biome, value, visited)
+            || visitForClue(x, y - 1, biome, value, visited);
+    }
+
     public boolean isFull() {
         for (int y = 0; y < this.curNumber.length; y++) {
             for (int x = 0; x < this.curNumber[0].length; x++) {
@@ -152,22 +192,8 @@ public class Level {
         }
     }
 
-    public byte[][] getFixedNumbers() {
-        return fixedNumbers;
-    }
-
     public void restart() {
-        fixed = false;
         this.curNumber = Helper.cloneArray(this.startLevel);
-        this.fixedNumbers = Helper.cloneArray(this.curNumber);
-    }
-
-    public void fix() {
-        fixed = !fixed;
-        if (fixed) {
-            this.fixedNumbers = Helper.cloneArray(this.curNumber);
-        } else {
-            this.fixedNumbers = Helper.cloneArray(this.startLevel);
-        }
+        this.hints = new byte[this.startLevel.length][this.startLevel[0].length];
     }
 }

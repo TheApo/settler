@@ -11,6 +11,7 @@ public class AndroidLauncher extends AndroidApplication {
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Constants.IS_ANDROID = true;
+		Constants.IS_MOBILE = true;
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		config.useWakelock = true;
 		initialize(new Settler(), config);

@@ -276,9 +276,6 @@ public class Algorithm extends SequentiallyThinkingScreenModel {
                 }
                 if (this.level.getCurNumber()[y][x] > 0) {
                     getMainPanel().spriteBatch.draw(AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1], x * tileSizeWidth + addX + addXScale + tileSizeWidth / 2f - AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1].getRegionWidth() * smaller / 2f, addY + y * tileSizeWidth + tileSizeWidth / 2f - AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1].getRegionHeight() * smaller / 2f, AssetLoader.circlesTextureRegion[5].getRegionWidth() * smaller, AssetLoader.circlesTextureRegion[5].getRegionHeight() * smaller);
-                    if (this.level.getFixedNumbers()[y][x] > 0) {
-                        getMainPanel().spriteBatch.draw(AssetLoader.circlesTextureRegion[5], x * tileSizeWidth + addX + addXScale + tileSizeWidth / 2f - AssetLoader.circlesTextureRegion[5].getRegionWidth() * smaller / 2f, addY + y * tileSizeWidth + tileSizeWidth / 2f - AssetLoader.circlesTextureRegion[5].getRegionHeight() * smaller / 2f, AssetLoader.circlesTextureRegion[5].getRegionWidth() * smaller, AssetLoader.circlesTextureRegion[5].getRegionHeight() * smaller);
-                    }
                     //getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + tileSizeWidth/2f, addY + y * tileSizeWidth + tileSizeWidth/2f, Constants.COLOR_WHITE, AssetLoader.font40, DrawString.MIDDLE, true, false);
                     getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + addXScale + tileSizeWidth / 2f, addY + y * tileSizeWidth + tileSizeWidth / 2f + 4, Constants.COLOR_BLACK, AssetLoader.font20, DrawString.MIDDLE, true, false);
                 }
@@ -295,9 +292,29 @@ public class Algorithm extends SequentiallyThinkingScreenModel {
 
         getMainPanel().spriteBatch.end();
 
+        drawFixedNumberRings(tileSizeWidth, smaller);
+
         for (ApoButton button : this.getMainPanel().getButtons()) {
             button.render(this.getMainPanel());
         }
+    }
+
+    private void drawFixedNumberRings(int tileSizeWidth, float scale) {
+        float ringRadius = AssetLoader.circlesTextureRegion[5].getRegionWidth() * scale / 2f;
+        float ringThickness = Math.max(4f, 7f * scale);
+
+        getMainPanel().getRenderer().begin(ShapeRenderer.ShapeType.Filled);
+        getMainPanel().getRenderer().setColor(Constants.COLOR_RED[0], Constants.COLOR_RED[1], Constants.COLOR_RED[2], Constants.COLOR_RED[3]);
+        for (int y = 0; y < this.level.getCurNumber().length; y++) {
+            for (int x = 0; x < this.level.getCurNumber()[0].length; x++) {
+                if (this.level.getStartLevel()[y][x] > 0 && this.level.getCurNumber()[y][x] > 0) {
+                    float ringCx = x * tileSizeWidth + addX + addXScale + tileSizeWidth / 2f;
+                    float ringCy = addY + y * tileSizeWidth + tileSizeWidth / 2f;
+                    getMainPanel().getRenderer().drawThickCircleOutline(ringCx, ringCy, ringRadius, ringThickness);
+                }
+            }
+        }
+        getMainPanel().getRenderer().end();
     }
 
 //	        Gdx.graphics.getGL20().glEnable(GL20.GL_BLEND);

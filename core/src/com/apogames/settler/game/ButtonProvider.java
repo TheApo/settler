@@ -33,6 +33,7 @@ import com.apogames.settler.entity.ApoButton;
 import com.apogames.settler.entity.ApoButtonColor;
 import com.apogames.settler.entity.ApoButtonImageThree;
 import com.apogames.settler.entity.ApoButtonImageWithThree;
+import com.apogames.settler.entity.HintBubble;
 import com.apogames.settler.game.algorithm.Algorithm;
 import com.apogames.settler.game.menu.Menu;
 import com.apogames.settler.game.tiwanaku.Tiwanaku;
@@ -214,7 +215,7 @@ public class ButtonProvider {
 			y = 50;
 			button = new ApoButtonImageWithThree(x, y, width, height, function, text, AssetLoader.buttonFixTextureRegion);
 			button.setFont(AssetLoader.font15);
-			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Fix set values");
+			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Hints");
 			this.game.getButtons().add(button);
 
 			text = "";
@@ -227,6 +228,14 @@ public class ButtonProvider {
 			button.setFont(AssetLoader.font15);
 			((ApoButtonImageWithThree)(button)).setMouseOverText(AssetLoader.buttonBlancoTextureRegion[0], "Help");
 			this.game.getButtons().add(button);
+
+			int hudStartX = Constants.GAME_WIDTH - 5 - AssetLoader.hudRightTextureRegion.getRegionWidth();
+			int bubbleX = hudStartX + (AssetLoader.hudRightTextureRegion.getRegionWidth() - Tiwanaku.HUD_BUBBLE_SIZE) / 2;
+			for (int v = 1; v <= Tiwanaku.HINT_VALUE_COUNT; v++) {
+				int bubbleY = Tiwanaku.HUD_BUBBLE_START_Y + (v - 1) * (Tiwanaku.HUD_BUBBLE_SIZE + Tiwanaku.HUD_BUBBLE_SPACING);
+				HintBubble bubble = new HintBubble(bubbleX, bubbleY, Tiwanaku.HUD_BUBBLE_SIZE, v, Tiwanaku.FUNCTION_HINT[v - 1], this.game);
+				this.game.getButtons().add(bubble);
+			}
 
 			text = "X";
 			function = Algorithm.FUNCTION_BACK;

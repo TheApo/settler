@@ -106,6 +106,73 @@ public class MyShapeRenderer extends ShapeRenderer {
 		super.arc(x + radius, y + height - radius, radius, 90f, 90f);
 	}
 
+	/**
+	 * Draws a thick circle outline (annulus) using filled triangles.
+	 * Must be called inside a {@link ShapeType#Filled} block. Works identically
+	 * on TeaVM / WebGL where {@code glLineWidth} is unreliable.
+	 *
+	 * @param cx        center x
+	 * @param cy        center y
+	 * @param radius    stroke centerline radius
+	 * @param thickness total stroke thickness (inner to outer edge)
+	 */
+	public void drawThickCircleOutline(float cx, float cy, float radius, float thickness) {
+		float inner = radius - thickness / 2f;
+		float outer = radius + thickness / 2f;
+		if (inner < 0f) inner = 0f;
+
+		int segments = Math.max(24, (int) (12 * (float) Math.cbrt(radius)));
+		float theta = MathUtils.PI2 / segments;
+		float cos = MathUtils.cos(theta);
+		float sin = MathUtils.sin(theta);
+
+		float px = 1f;
+		float py = 0f;
+		for (int i = 0; i < segments; i++) {
+			float nx = cos * px - sin * py;
+			float ny = sin * px + cos * py;
+
+			float ix1 = cx + px * inner;
+			float iy1 = cy + py * inner;
+			float ox1 = cx + px * outer;
+			float oy1 = cy + py * outer;
+			float ix2 = cx + nx * inner;
+			float iy2 = cy + ny * inner;
+			float ox2 = cx + nx * outer;
+			float oy2 = cy + ny * outer;
+
+			super.triangle(ix1, iy1, ox1, oy1, ox2, oy2);
+			super.triangle(ix1, iy1, ox2, oy2, ix2, iy2);
+
+			px = nx;
+			py = ny;
+		}
+	}
+
+	/**
+	 * Draws a thick rectangular outline centered on the edges of the given rect.
+	 * Must be called inside a {@link ShapeType#Filled} block. Uses four filled
+	 * rects, so it renders identically on TeaVM / WebGL.
+	 *
+	 * @param x         rect left
+	 * @param y         rect bottom
+	 * @param width     rect width
+	 * @param height    rect height
+	 * @param thickness stroke thickness (centered on the rect edges)
+	 */
+	public void drawThickRectOutline(float x, float y, float width, float height, float thickness) {
+		float half = thickness / 2f;
+		float ox = x - half;
+		float oy = y - half;
+		float ow = width + thickness;
+		float oh = height + thickness;
+
+		super.rect(ox, oy, ow, thickness);
+		super.rect(ox, oy + oh - thickness, ow, thickness);
+		super.rect(ox, oy + thickness, thickness, oh - 2f * thickness);
+		super.rect(ox + ow - thickness, oy + thickness, thickness, oh - 2f * thickness);
+	}
+
 	EarClippingTriangulator ear = new EarClippingTriangulator();
 
     /**

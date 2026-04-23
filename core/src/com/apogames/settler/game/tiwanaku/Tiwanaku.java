@@ -6,13 +6,13 @@ import com.apogames.settler.backend.DrawString;
 import com.apogames.settler.backend.SequentiallyThinkingScreenModel;
 import com.apogames.settler.common.Localization;
 import com.apogames.settler.entity.ApoButton;
+import com.apogames.settler.entity.HintBubble;
 import com.apogames.settler.game.MainPanel;
 import com.apogames.settler.level.LevelCreate;
 import com.apogames.settler.level.Level;
 import com.apogames.settler.level.NewLevelCreate;
 import com.apogames.settler.level.Solve;
 import com.apogames.settler.level.helper.Difficulty;
-import com.apogames.settler.level.helper.FillHelp;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -36,6 +36,23 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
     public static final String FUNCTION_FINISH_NEW_LEVEL = "TIWANAKU_FINISH_NEW_LEVEL";
     public static final String FUNCTION_FINISH_RESTART = "TIWANAKU_FINISH_RESTART";
 
+    public static final int HINT_VALUE_COUNT = 5;
+    public static final int HUD_BUBBLE_SIZE = 80;
+    public static final int HUD_BUBBLE_SPACING = 10;
+    public static final int HUD_BUBBLE_START_Y = 170;
+
+    private static final int HUD_TEXT_LEFT = 30;
+    private static final int HUD_TEXT_WIDTH = 165;
+    private static final int HUD_TEXT_LINE_HEIGHT = 22;
+    private static final int HUD_TITLE_Y = 130;
+    private static final int HUD_INSTRUCTION_Y = 180;
+    private static final int HUD_EXIT_Y = 290;
+    private static final int HUD_CLICK_HINT_Y = 540;
+
+    public static final String[] FUNCTION_HINT = {
+            "TIWANAKU_HINT_1", "TIWANAKU_HINT_2", "TIWANAKU_HINT_3", "TIWANAKU_HINT_4", "TIWANAKU_HINT_5"
+    };
+
     private final boolean[] keys = new boolean[256];
 
     private boolean isPressed = false;
@@ -52,7 +69,11 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
 
     private GameState gameState = GameState.PLAY;
 
-    private boolean help;
+    private boolean hintMode;
+    private int selectedX = -1;
+    private int selectedY = -1;
+    private int helpHintX = -1;
+    private int helpHintY = -1;
 
     private Difficulty difficulty;
 
@@ -65,12 +86,43 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
     public void setNeededButtonsVisible() {
         getMainPanel().getButtonByFunction(FUNCTION_TIWANAKU_BACK).setVisible(true);
         getMainPanel().getButtonByFunction(FUNCTION_RESTART).setVisible(true);
-        getMainPanel().getButtonByFunction(FUNCTION_FIX).setVisible(true);
-        getMainPanel().getButtonByFunction(FUNCTION_NEW_LEVEL).setVisible(true);
-        getMainPanel().getButtonByFunction(FUNCTION_HELP).setVisible(true);
+        ApoButton fixButton = getMainPanel().getButtonByFunction(FUNCTION_FIX);
+        fixButton.setVisible(true);
+        fixButton.setSelect(hintMode);
+        getMainPanel().getButtonByFunction(FUNCTION_NEW_LEVEL).setVisible(!hintMode);
+        getMainPanel().getButtonByFunction(FUNCTION_HELP).setVisible(!hintMode);
         getMainPanel().getButtonByFunction(FUNCTION_FINISH_BACK).setVisible(false);
         getMainPanel().getButtonByFunction(FUNCTION_FINISH_RESTART).setVisible(false);
         getMainPanel().getButtonByFunction(FUNCTION_FINISH_NEW_LEVEL).setVisible(false);
+        for (String fn : FUNCTION_HINT) {
+            getMainPanel().getButtonByFunction(fn).setVisible(true);
+        }
+    }
+
+    public boolean isHintMode() {
+        return this.hintMode;
+    }
+
+    public boolean isHintBubbleVisible(int value) {
+        if (!this.hintMode || this.selectedX < 0 || value > getSelectedRegionSize()) {
+            return false;
+        }
+        return !this.level.hasClueInBiomeOf(this.selectedX, this.selectedY, value);
+    }
+
+    public boolean isHintActive(int value) {
+        if (this.selectedX < 0) {
+            return false;
+        }
+        return this.level.hasHint(this.selectedX, this.selectedY, value);
+    }
+
+    private void resetHintState() {
+        this.hintMode = false;
+        this.selectedX = -1;
+        this.selectedY = -1;
+        this.helpHintX = -1;
+        this.helpHintY = -1;
     }
 
     public void setValues(LevelSize levelSize, boolean newLevel, Difficulty difficulty) {
@@ -110,7 +162,7 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
         this.level = this.levelCreate.getLevel();
         this.setSolve();
         this.gameState = GameState.PLAY;
-        this.help = false;
+        this.resetHintState();
         this.error = null;
 
         this.getMainPanel().getButtonByFunction(FUNCTION_NEW_LEVEL).setVisible(true);
@@ -150,36 +202,85 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
             return;
         }
 
-        int tileSize = AssetLoader.backgroundTextureRegion[4].getRegionWidth();
-        if (this.level.getCurNumber().length > 5) {
-            tileSize = 640 / this.level.getCurNumber().length;
+        int tileSize = getTileSize();
+        int gridX0 = this.addX + this.addXScale;
+        int gridY0 = this.addY;
+        int gridW = tileSize * this.level.getBackground()[0].length;
+        int gridH = tileSize * this.level.getBackground().length;
+        boolean inGrid = mouseX >= gridX0 && mouseX < gridX0 + gridW
+                      && mouseY >= gridY0 && mouseY < gridY0 + gridH;
+
+        if (this.hintMode) {
+            handleHintModeClick(mouseX, mouseY, inGrid, gridX0, gridY0, tileSize);
+        } else if (inGrid) {
+            int x = (mouseX - gridX0) / tileSize;
+            int y = (mouseY - gridY0) / tileSize;
+            handleNormalGridClick(x, y, isRightButton);
         }
-        if (this.addX + addXScale < mouseX && this.addX + addXScale + tileSize * this.level.getBackground()[0].length > mouseX &&
-            this.addY < mouseY && this.addY + tileSize * this.level.getBackground().length > mouseY) {
-            int x = (mouseX - this.addX - addXScale) / tileSize;
-            int y = (mouseY - this.addY) / tileSize;
-            if (this.level.getFixedNumbers()[y][x] == 0) {
-                this.error = null;
-                byte add = (byte) (isRightButton ? -1 : 1);
-                this.level.getCurNumber()[y][x] = (byte) (this.level.getCurNumber()[y][x] + add);
-                if (this.level.getCurNumber()[y][x] > this.level.getRegion()[y][x]) {
-                    this.level.getCurNumber()[y][x] = 0;
-                }
-                if (this.level.getCurNumber()[y][x] < 0) {
-                    this.level.getCurNumber()[y][x] = this.level.getRegion()[y][x];
-                }
-                this.setSolve();
-                if (this.level.isSolved()) {
-                    this.gameSolved();
-                } else {
-                    this.updateError();
-                }
+    }
+
+    private int getTileSize() {
+        if (this.level.getCurNumber().length > 5) {
+            return 640 / this.level.getCurNumber().length;
+        }
+        return AssetLoader.backgroundTextureRegion[4].getRegionWidth();
+    }
+
+    private void handleHintModeClick(int mouseX, int mouseY, boolean inGrid, int gridX0, int gridY0, int tileSize) {
+        if (inGrid) {
+            int x = (mouseX - gridX0) / tileSize;
+            int y = (mouseY - gridY0) / tileSize;
+            if (this.level.getCurNumber()[y][x] > 0 || (x == this.selectedX && y == this.selectedY)) {
+                this.selectedX = -1;
+                this.selectedY = -1;
+            } else {
+                this.selectedX = x;
+                this.selectedY = y;
             }
+            return;
+        }
+        this.selectedX = -1;
+        this.selectedY = -1;
+    }
+
+    public int getSelectedRegionSize() {
+        if (this.selectedX < 0 || this.selectedY < 0) {
+            return 0;
+        }
+        int regionSize = this.level.getRegion()[this.selectedY][this.selectedX];
+        return Math.min(regionSize, HINT_VALUE_COUNT);
+    }
+
+    private void handleNormalGridClick(int x, int y, boolean isRightButton) {
+        if (this.level.getStartLevel()[y][x] > 0) {
+            return;
+        }
+        this.error = null;
+        byte add = (byte) (isRightButton ? -1 : 1);
+        this.level.getCurNumber()[y][x] = (byte) (this.level.getCurNumber()[y][x] + add);
+        if (this.level.getCurNumber()[y][x] > this.level.getRegion()[y][x]) {
+            this.level.getCurNumber()[y][x] = 0;
+        }
+        if (this.level.getCurNumber()[y][x] < 0) {
+            this.level.getCurNumber()[y][x] = this.level.getRegion()[y][x];
+        }
+        this.setSolve();
+
+        if (this.helpHintX == x && this.helpHintY == y && this.level.getCurNumber()[y][x] != 0) {
+            this.helpHintX = -1;
+            this.helpHintY = -1;
+        }
+
+        if (this.level.isSolved()) {
+            this.gameSolved();
+        } else {
+            this.updateError();
         }
     }
 
     private void gameSolved() {
         this.gameState = GameState.SOLVED;
+        this.resetHintState();
         this.setButtonsVisibility();
 //        this.getMainPanel().getButtonByFunction(FUNCTION_NEW_LEVEL).setVisible(true);
 //        this.getMainPanel().getButtonByFunction(FUNCTION_RESTART).setVisible(true);
@@ -217,31 +318,69 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
                 restartLevel();
                 break;
             case Tiwanaku.FUNCTION_FIX:
-                saveCurrentFixLevel();
+                toggleHintMode();
                 break;
             case Tiwanaku.FUNCTION_HELP:
-                this.help = !this.help;
-                this.updateError();
+                findHelpHint();
+                break;
+            default:
+                ApoButton clicked = getMainPanel().getButtonByFunction(function);
+                if (clicked instanceof HintBubble) {
+                    toggleHintOnSelected(((HintBubble) clicked).getValue());
+                }
                 break;
         }
     }
 
+    private void toggleHintOnSelected(int value) {
+        if (this.selectedX >= 0 && this.selectedY >= 0) {
+            this.level.toggleHint(this.selectedX, this.selectedY, value);
+        }
+    }
+
+    private void toggleHintMode() {
+        this.hintMode = !this.hintMode;
+        this.selectedX = -1;
+        this.selectedY = -1;
+        this.helpHintX = -1;
+        this.helpHintY = -1;
+        setNeededButtonsVisible();
+    }
+
+    private void findHelpHint() {
+        this.setSolve();
+        ArrayList<int[]> candidates = new ArrayList<>();
+        for (int y = 0; y < this.level.getCurNumber().length; y++) {
+            for (int x = 0; x < this.level.getCurNumber()[0].length; x++) {
+                if (this.level.getCurNumber()[y][x] == 0
+                    && this.level.getBackground()[y][x] > 0
+                    && this.solve.getPossibleValues()[y][x].getPossibleValues().size() == 1) {
+                    candidates.add(new int[]{x, y});
+                }
+            }
+        }
+        if (candidates.isEmpty()) {
+            this.helpHintX = -1;
+            this.helpHintY = -1;
+            return;
+        }
+        int[] pick = candidates.get((int) (Math.random() * candidates.size()));
+        this.helpHintX = pick[0];
+        this.helpHintY = pick[1];
+    }
+
     private void updateError() {
-        if (this.help || this.level.isFull()) {
+        if (this.level.isFull()) {
             this.error = this.level.getError();
         } else {
             this.error = null;
         }
     }
 
-    private void saveCurrentFixLevel() {
-        this.level.fix();
-    }
-
     private void restartLevel() {
         this.level.restart();
         this.gameState = GameState.PLAY;
-        this.help = false;
+        this.resetHintState();
         this.error = null;
         this.setNeededButtonsVisible();
     }
@@ -283,22 +422,12 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
         float hudStartX = Constants.GAME_WIDTH - 5 - AssetLoader.hudRightTextureRegion.getRegionWidth();
         getMainPanel().spriteBatch.draw(AssetLoader.hudRightTextureRegion, hudStartX, 5);
 
-        int startY = 130;
-        getMainPanel().drawString("Level:", hudStartX + 30, startY, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
-        getMainPanel().drawString(this.levelSize.getX()+"x"+this.levelSize.getY(), hudStartX + 60, startY + 30, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
-
-        getMainPanel().drawString(Localization.getInstance().getCommon().get("menu_difficulty")+":", hudStartX + 30, startY + 80, Constants.COLOR_WHITE, AssetLoader.font15, DrawString.BEGIN, false, false);
-        getMainPanel().drawString(this.difficulty.toString(), hudStartX + 60, startY + 110, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
-
-        getMainPanel().drawString(Localization.getInstance().getCommon().get("hud_rules")+":", hudStartX + 30, startY + 180, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
-        String[] rules = Localization.getInstance().getCommon().get("hud_rules_text").split(";");
-        for (int i = 0; i < rules.length; i++) {
-            getMainPanel().drawString(rules[i], hudStartX + 30, startY + 210 + i * 20, Constants.COLOR_WHITE, AssetLoader.font15, DrawString.BEGIN, false, false);
-        }
-
+        renderHudContent(hudStartX);
 
         getMainPanel().spriteBatch.draw(AssetLoader.titleTextureRegion, (Constants.GAME_WIDTH - AssetLoader.hudRightTextureRegion.getRegionWidth() - AssetLoader.titleTextureRegion.getRegionWidth())/2f, 5);
         getMainPanel().drawString(Constants.PROPERTY_NAME, (Constants.GAME_WIDTH - AssetLoader.hudRightTextureRegion.getRegionWidth())/2f, 44, Constants.COLOR_WHITE, AssetLoader.font30, DrawString.MIDDLE, true, false);
+
+        getMainPanel().spriteBatch.end();
 
         int tileSizeWidth = AssetLoader.backgroundTextureRegion[4].getRegionWidth();
         int tileSizeHeight = AssetLoader.backgroundTextureRegion[4].getRegionHeight();
@@ -309,35 +438,59 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
             scale = (float)tileSizeWidth / AssetLoader.backgroundTextureRegion[4].getRegionWidth();
         }
 
-        for (int y = 0; y < this.level.getCurBackground().length; y++) {
-            for (int x = 0; x < this.level.getCurBackground()[0].length; x++) {
-                //if (this.level.getCurBackground()[y][x] > 0) {
-                if (this.level.getBackground()[y][x] > 0) {
-                    getMainPanel().spriteBatch.draw(AssetLoader.backgroundTextureRegion[this.level.getBackground()[y][x] - 1], x * tileSizeWidth + addX + addXScale, addY + y * tileSizeWidth - (tileSizeHeight - tileSizeWidth), tileSizeWidth, tileSizeHeight);
-                } else {
-                    getMainPanel().spriteBatch.draw(AssetLoader.backgroundTextureRegion[4], x * tileSizeWidth + addX + addXScale, addY + y * tileSizeWidth - (tileSizeHeight - tileSizeWidth), tileSizeWidth, tileSizeHeight);
+        float ringRadius = AssetLoader.circlesTextureRegion[5].getRegionWidth() * scale / 2f;
+        float clueHalo = Constants.IS_MOBILE ? Math.max(2f, 3f * scale) : 0;
+        int rows = this.level.getCurBackground().length;
+        int cols = this.level.getCurBackground()[0].length;
+        BitmapFont numberFont = scale < 1.0f ? AssetLoader.font30 : AssetLoader.font40;
+
+        for (int y = 0; y < rows; y++) {
+            getMainPanel().spriteBatch.begin();
+            for (int x = 0; x < cols; x++) {
+                int biomeIndex = this.level.getBackground()[y][x] > 0 ? this.level.getBackground()[y][x] - 1 : 4;
+                getMainPanel().spriteBatch.draw(AssetLoader.backgroundTextureRegion[biomeIndex], x * tileSizeWidth + addX + addXScale, addY + y * tileSizeWidth - (tileSizeHeight - tileSizeWidth), tileSizeWidth, tileSizeHeight);
+            }
+            getMainPanel().spriteBatch.end();
+
+            float outlineThickness = Math.max(4f, 7f * scale);
+            getMainPanel().getRenderer().begin(ShapeRenderer.ShapeType.Filled);
+            getMainPanel().getRenderer().setColor(Constants.COLOR_RED[0], Constants.COLOR_RED[1], Constants.COLOR_RED[2], Constants.COLOR_RED[3]);
+            for (int x = 0; x < cols; x++) {
+                if (this.level.getStartLevel()[y][x] > 0 && this.level.getCurNumber()[y][x] > 0) {
+                    float ringCx = x * tileSizeWidth + addX + addXScale + tileSizeWidth / 2f;
+                    float ringCy = addY + y * tileSizeWidth + tileSizeWidth / 2f;
+                    getMainPanel().getRenderer().circle(ringCx, ringCy, ringRadius + clueHalo);
                 }
+            }
+            if (this.helpHintY == y && this.helpHintX >= 0 && this.level.getCurNumber()[y][this.helpHintX] == 0) {
+                getMainPanel().getRenderer().setColor(Constants.COLOR_GREEN_BRIGHT[0], Constants.COLOR_GREEN_BRIGHT[1], Constants.COLOR_GREEN_BRIGHT[2], 1f);
+                getMainPanel().getRenderer().drawThickRectOutline(this.helpHintX * tileSizeWidth + addX + addXScale, addY + y * tileSizeWidth, tileSizeWidth, tileSizeWidth, outlineThickness);
+            }
+            if (this.hintMode && this.selectedY == y && this.selectedX >= 0) {
+                getMainPanel().getRenderer().setColor(Constants.COLOR_YELLOW[0], Constants.COLOR_YELLOW[1], Constants.COLOR_YELLOW[2], 1f);
+                getMainPanel().getRenderer().drawThickRectOutline(this.selectedX * tileSizeWidth + addX + addXScale, addY + y * tileSizeWidth, tileSizeWidth, tileSizeWidth, outlineThickness);
+            }
+            getMainPanel().getRenderer().end();
+
+            getMainPanel().spriteBatch.begin();
+            for (int x = 0; x < cols; x++) {
                 if (this.level.getCurNumber()[y][x] > 0) {
                     getMainPanel().spriteBatch.draw(AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1], x * tileSizeWidth + addX + addXScale + tileSizeWidth/2f - AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1].getRegionWidth()*scale/2f, addY + y * tileSizeWidth + tileSizeWidth/2f - AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1].getRegionHeight()*scale/2f, AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1].getRegionWidth()*scale, AssetLoader.circlesTextureRegion[this.level.getCurNumber()[y][x] - 1].getRegionHeight()*scale);
-                    if (this.level.getFixedNumbers()[y][x] > 0) {
-                        getMainPanel().spriteBatch.draw(AssetLoader.circlesTextureRegion[5], x * tileSizeWidth + addX + addXScale + tileSizeWidth / 2f - AssetLoader.circlesTextureRegion[5].getRegionWidth() * scale / 2f, addY + y * tileSizeWidth + tileSizeWidth / 2f - AssetLoader.circlesTextureRegion[5].getRegionHeight() * scale / 2f, AssetLoader.circlesTextureRegion[5].getRegionWidth() * scale, AssetLoader.circlesTextureRegion[5].getRegionHeight() * scale);
+
+                    if (this.level.getStartLevel()[y][x] > 0 && !Constants.IS_MOBILE) {
+                        getMainPanel().spriteBatch.draw(AssetLoader.circlesTextureRegion[5], x * tileSizeWidth + addX + addXScale + tileSizeWidth/2f - AssetLoader.circlesTextureRegion[5].getRegionWidth()*scale/2f, addY + y * tileSizeWidth + tileSizeWidth/2f - AssetLoader.circlesTextureRegion[5].getRegionHeight()*scale/2f, AssetLoader.circlesTextureRegion[5].getRegionWidth()*scale, AssetLoader.circlesTextureRegion[5].getRegionHeight()*scale);
                     }
-                    BitmapFont font40 = AssetLoader.font40;
-                    if (scale < 1.0f) {
-                        font40 = AssetLoader.font30;
-                    }
-                    //getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + tileSizeWidth/2f, addY + y * tileSizeWidth + tileSizeWidth/2f, Constants.COLOR_WHITE, AssetLoader.font40, DrawString.MIDDLE, true, false);
 
                     float[] color = Constants.COLOR_BLACK;
                     if (this.error != null && this.error[y][x] > 0) {
                         color = Constants.COLOR_RED;
                     }
-                    getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + addXScale + tileSizeWidth/2f, addY + y * tileSizeWidth + tileSizeWidth/2f + 4, color, font40, DrawString.MIDDLE, true, false);
-                }
-
-                if (this.help && this.level.getCurNumber()[y][x] == 0) {
-                    ArrayList<Byte> possibleValues = this.solve.getPossibleValues()[y][x].getPossibleValues();
-                    for (int value : possibleValues) {
+                    getMainPanel().drawString(String.valueOf(this.level.getCurNumber()[y][x]), x * tileSizeWidth + addX + addXScale + tileSizeWidth/2f, addY + y * tileSizeWidth + tileSizeWidth/2f + 4, color, numberFont, DrawString.MIDDLE, true, false);
+                } else if (this.level.getBackground()[y][x] > 0) {
+                    for (int value = 1; value <= HINT_VALUE_COUNT; value++) {
+                        if (!this.level.hasHint(x, y, value)) {
+                            continue;
+                        }
                         int addValueX = (value - 1) * tileSizeWidth/4 + 10;
                         if (value > 3) {
                             addValueX = (value - 4) * tileSizeWidth/4 + 10;
@@ -349,17 +502,12 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
                         getMainPanel().spriteBatch.draw(AssetLoader.circlesTextureRegion[value-1], x * tileSizeWidth + addX + addXScale + addValueX, addY + addValueY + y * tileSizeWidth + tileSizeWidth/2f - AssetLoader.circlesTextureRegion[value].getRegionHeight()/2f, AssetLoader.circlesTextureRegion[value].getRegionWidth()/2f, AssetLoader.circlesTextureRegion[value].getRegionHeight()/2f);
                     }
                 }
-
-//                getMainPanel().spriteBatch.draw(AssetLoader.backgroundTextureRegion[this.level.getBackground()[y][x] - 1], x * tileSizeWidth * smaller + addX + addSmall, addY + y * tileSizeWidth * smaller - (tileSizeHeight - tileSizeWidth) * smaller, tileSizeWidth * smaller, tileSizeHeight * smaller);
-//                getMainPanel().drawString(String.valueOf(this.level.getNumbers()[y][x]), x * tileSizeWidth * smaller + addX + addSmall + tileSizeWidth * smaller/2f + 1, addY + y * tileSizeWidth * smaller + tileSizeWidth * smaller/2f + 1, Constants.COLOR_BLACK, AssetLoader.font30, DrawString.MIDDLE, true, false);
-//
-//                int addSolveY = 350;
-//                getMainPanel().spriteBatch.draw(AssetLoader.backgroundTextureRegion[this.level.getBackground()[y][x] - 1], x * tileSizeWidth * smaller + addX + addSmall, addY + addSolveY + y * tileSizeWidth * smaller - (tileSizeHeight - tileSizeWidth) * smaller, tileSizeWidth * smaller, tileSizeHeight * smaller);
-//                getMainPanel().drawString(String.valueOf(this.level.getSolvedNumbers()[y][x]), x * tileSizeWidth * smaller + addX + addSmall + tileSizeWidth * smaller/2f + 1, addY + addSolveY + y * tileSizeWidth * smaller + tileSizeWidth * smaller/2f + 1, Constants.COLOR_BLACK, AssetLoader.font30, DrawString.MIDDLE, true, false);
             }
+            getMainPanel().spriteBatch.end();
         }
 
         if (this.gameState == GameState.SOLVED) {
+            getMainPanel().spriteBatch.begin();
             float wonX = (Constants.GAME_WIDTH - AssetLoader.hudRightTextureRegion.getRegionWidth())/2f;
             float wonY = Constants.GAME_HEIGHT/2f - AssetLoader.wonTextureRegion.getRegionHeight()/2f;
             getMainPanel().spriteBatch.draw(AssetLoader.wonTextureRegion, wonX - AssetLoader.wonTextureRegion.getRegionWidth()/2f, wonY);
@@ -368,9 +516,8 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
             getMainPanel().drawString(Localization.getInstance().getCommon().get("won_text"), wonX, wonY + 125, Constants.COLOR_WHITE, AssetLoader.font25, DrawString.MIDDLE, false, false);
 
             getMainPanel().drawString(Localization.getInstance().getCommon().get("won"), hudStartX + AssetLoader.hudRightTextureRegion.getRegionWidth()/2f, 70, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.MIDDLE, false, false);
+            getMainPanel().spriteBatch.end();
         }
-
-        getMainPanel().spriteBatch.end();
 
         for (ApoButton button : this.getMainPanel().getButtons()) {
             button.render(this.getMainPanel());
@@ -385,6 +532,70 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
 //			getMainPanel().getRenderer().roundedRectLine((WIDTH - width)/2f, startY, width, height, 5);
 //			getMainPanel().getRenderer().end();
 
+
+    private void renderHudContent(float hudStartX) {
+        if (!this.hintMode) {
+            int startY = 130;
+            getMainPanel().drawString("Level:", hudStartX + 30, startY, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
+            getMainPanel().drawString(this.levelSize.getX()+"x"+this.levelSize.getY(), hudStartX + 60, startY + 30, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
+
+            getMainPanel().drawString(Localization.getInstance().getCommon().get("menu_difficulty")+":", hudStartX + 30, startY + 80, Constants.COLOR_WHITE, AssetLoader.font15, DrawString.BEGIN, false, false);
+            getMainPanel().drawString(this.difficulty.toString(), hudStartX + 60, startY + 110, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
+
+            int blockHeaderY = startY + 160;
+            int blockStartY = startY + 190;
+            if (this.helpHintX >= 0) {
+                getMainPanel().drawString(Localization.getInstance().getCommon().get("hud_help")+":", hudStartX + 30, blockHeaderY, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
+                drawWrappedHudText(hudStartX, "hud_help_explanation", blockStartY);
+            } else {
+                getMainPanel().drawString(Localization.getInstance().getCommon().get("hud_rules")+":", hudStartX + 30, blockHeaderY, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
+                int lines1 = drawWrappedHudText(hudStartX, "hud_rule_1", blockStartY);
+                int rule2Y = blockStartY + (lines1 + 1) * HUD_TEXT_LINE_HEIGHT;
+                drawWrappedHudText(hudStartX, "hud_rule_2", rule2Y);
+            }
+            drawWrappedHudText(hudStartX, "hud_click_hint", HUD_CLICK_HINT_Y);
+            return;
+        }
+        getMainPanel().drawString(
+                Localization.getInstance().getCommon().get("hud_hint_title"),
+                hudStartX + HUD_TEXT_LEFT, HUD_TITLE_Y,
+                Constants.COLOR_WHITE, AssetLoader.font25, DrawString.BEGIN, false, false);
+        if (this.selectedX < 0) {
+            drawWrappedHudText(hudStartX, "hud_hint_instruction", HUD_INSTRUCTION_Y);
+            drawWrappedHudText(hudStartX, "hud_hint_exit", HUD_EXIT_Y);
+        }
+    }
+
+    private int drawWrappedHudText(float hudStartX, String key, int startY) {
+        String text = Localization.getInstance().getCommon().get(key);
+        BitmapFont font = AssetLoader.font15;
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+        int lineIdx = 0;
+        for (String word : words) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            String candidate = line.length() == 0 ? word : line + " " + word;
+            Constants.glyphLayout.setText(font, candidate);
+            if (Constants.glyphLayout.width > HUD_TEXT_WIDTH && line.length() > 0) {
+                getMainPanel().drawString(line.toString(), hudStartX + HUD_TEXT_LEFT, startY + lineIdx * HUD_TEXT_LINE_HEIGHT,
+                        Constants.COLOR_WHITE, font, DrawString.BEGIN, false, false);
+                line.setLength(0);
+                line.append(word);
+                lineIdx++;
+            } else {
+                line.setLength(0);
+                line.append(candidate);
+            }
+        }
+        if (line.length() > 0) {
+            getMainPanel().drawString(line.toString(), hudStartX + HUD_TEXT_LEFT, startY + lineIdx * HUD_TEXT_LINE_HEIGHT,
+                    Constants.COLOR_WHITE, font, DrawString.BEGIN, false, false);
+            lineIdx++;
+        }
+        return lineIdx;
+    }
 
     public void drawOverlay() {
     }

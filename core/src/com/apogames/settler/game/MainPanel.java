@@ -49,6 +49,10 @@ public class MainPanel extends GameScreen {
         this.changeToMenu();
     }
 
+    public Tiwanaku getGame() {
+        return this.game;
+    }
+
     public void changeToMenu() {
         this.changeModel(this.menu);
     }
