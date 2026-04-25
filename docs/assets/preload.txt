@@ -1,8 +1,8 @@
 i:b:/assets.txt:931:1
 i:b:/fonts/OpenSans.ttf:217360:1
-i:b:/i18n/settler.properties:830:1
-i:b:/i18n/settler_de.properties:933:1
-i:b:/i18n/settler_en.properties:830:1
+i:b:/i18n/settler.properties:907:1
+i:b:/i18n/settler_de.properties:1003:1
+i:b:/i18n/settler_en.properties:907:1
 i:b:/images/background.png:178624:1
 i:b:/images/background_main.png:423572:1
 i:b:/images/board_main.png:441064:1

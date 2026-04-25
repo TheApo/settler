@@ -348,6 +348,14 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
     }
 
     private void findHelpHint() {
+        byte[][] currentErrors = this.level.getError();
+        if (hasErrors(currentErrors)) {
+            this.error = currentErrors;
+            this.helpHintX = -1;
+            this.helpHintY = -1;
+            return;
+        }
+        this.error = null;
         this.setSolve();
         ArrayList<int[]> candidates = new ArrayList<>();
         for (int y = 0; y < this.level.getCurNumber().length; y++) {
@@ -367,6 +375,20 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
         int[] pick = candidates.get((int) (Math.random() * candidates.size()));
         this.helpHintX = pick[0];
         this.helpHintY = pick[1];
+    }
+
+    private boolean hasErrors(byte[][] error) {
+        if (error == null) {
+            return false;
+        }
+        for (int y = 0; y < error.length; y++) {
+            for (int x = 0; x < error[0].length; x++) {
+                if (error[y][x] > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void updateError() {
@@ -544,7 +566,10 @@ public class Tiwanaku extends SequentiallyThinkingScreenModel {
 
             int blockHeaderY = startY + 160;
             int blockStartY = startY + 190;
-            if (this.helpHintX >= 0) {
+            if (hasErrors(this.error)) {
+                getMainPanel().drawString(Localization.getInstance().getCommon().get("hud_help")+":", hudStartX + 30, blockHeaderY, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
+                drawWrappedHudText(hudStartX, "hud_help_errors", blockStartY);
+            } else if (this.helpHintX >= 0) {
                 getMainPanel().drawString(Localization.getInstance().getCommon().get("hud_help")+":", hudStartX + 30, blockHeaderY, Constants.COLOR_WHITE, AssetLoader.font20, DrawString.BEGIN, false, false);
                 drawWrappedHudText(hudStartX, "hud_help_explanation", blockStartY);
             } else {
